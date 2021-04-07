@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>vehicle Tracking</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/css/vendor.bundle.base.css')}}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css')}}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/images/favicon.ico')}}" />
+  </head>
+  <script>
+<!--    $('#exampleModaladd').on('show.bs.modal', function (event) {-->
+<!--var button = $(event.relatedTarget) // Button that triggered the modal-->
+<!--var recipient = button.data('whatever') // Extract info from data-* attributes-->
+<!--var modal = $(this)-->
+<!--modal.find('.modal-title').text('New message to ' + recipient)-->
+<!--modal.find('.modal-body input').val(recipient)-->
+<!--})-->
+<!--    $(function () {-->
+<!--  $('[data-toggle="tooltip"]').tooltip();-->
+<!--});-->
+
+function hideLoading() {
+  setTimeout(function(){
+    document.getElementById('load').classList.add('hidden');
+  },2000)
+}
+    </script>
+  <style>
+    .hidden {
+  display: none;
+}
+  </style>
+  <body onload="hideLoading()">
+    <div class="container-scroller">
+      <!-- partial:partials/_navbar.html -->
+      <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+          <a class="navbar-brand brand-logo" href="index.html"><img src="{{ url_for('static', filename='assets/images/logo.svg')}}" alt="logo" /></a>
+          <a class="navbar-brand brand-logo-mini" href="index.html"><img src="{{ url_for('static', filename='assets/images/logo-mini.svg')}}" alt="logo" /></a>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-stretch">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="mdi mdi-menu"></span>
+          </button>
+          <div class="search-field d-none d-md-block">
+            <form class="d-flex align-items-center h-100" action="#">
+              <div class="input-group">
+                <div class="input-group-prepend bg-transparent">
+                  <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                </div>
+                <input type="text" class="form-control bg-transparent border-0" placeholder="Search">
+              </div>
+            </form>
+          </div>
+          <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item nav-profile dropdown">
+              <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
+                <div class="nav-profile-img">
+                  <img src="{{ url_for('static', filename='assets/images/faces/face1.jpg')}}" alt="image">
+                  <span class="availability-status online"></span>
+                </div>
+                <div class="nav-profile-text">
+                  <p class="mb-1 text-black">{{ current_user.username }}</p>
+                </div>
+              </a>
+              <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
+                <a class="dropdown-item" href="#">
+                  <i class="mdi mdi-cached mr-2 text-success"></i> Activity Log </a>
+                <div class="dropdown-divider"></div>
+                {% if current_user.is_authenticated %}
+                <a class="dropdown-item" href="{{ url_for('auth.logout')}}">
+                  <i class="mdi mdi-logout mr-2 text-primary"></i> Signout </a>
+                       {% endif %}
+                   {% if not current_user.is_authenticated %}
+                      <a class="dropdown-item" href="{{ url.for('auth.login')}}">
+                  <i class="mdi mdi-logout mr-2 text-primary"></i> login </a>
+                       {% endif %}
+              </div>
+            </li>
+            <li class="nav-item d-none d-lg-block full-screen-link">
+              <a class="nav-link">
+                <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
+              </a>
+            </li>
+      
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">
+                <span class="menu-title">Dashboard</span>
+                <i class="mdi mdi-home menu-icon"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
+                <span class="menu-title">Login</span>
+                <i class="menu-arrow"></i>
+              </a>
+              <div class="collapse" id="general-pages">
+                <ul class="nav flex-column sub-menu">
+
+                  <li class="nav-item"> <a class="nav-link" href="/login"> Login </a></li>
+
+                  <li class="nav-item"> <a class="nav-link" href="/signup"> Register </a></li>
+ 
+                </ul>
+              </div>
+            </li>
+
+          </ul>
+        </nav>
+
+
+{% block content %} {% endblock %}
+
+
+        <footer class="footer">
+          <div class="container-fluid clearfix">
+            <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright ©aadi 2021</span>
+            
+          </div>
+        </footer>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+
+
+
+
+
+
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="{{ url_for('static', filename='assets/vendors/js/vendor.bundle.base.js')}}"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="{{ url_for('static', filename='assets/js/off-canvas.js')}}"></script>
+  <script src="{{ url_for('static', filename='assets/js/hoverable-collapse.js')}}"></script>
+  <script src="{{ url_for('static', filename='assets/js/misc.js')}}"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page -->
+  <script src="{{ url_for('static', filename='assets/js/dashboard.js')}}"></script>
+  <!-- End custom js for this page -->
+
+</body>
+</html>

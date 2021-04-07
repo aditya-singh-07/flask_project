@@ -1,0 +1,255 @@
+{% extends "pages/base.html" %}
+{% block content %}
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="row" id="proBanner">
+            </div>
+            <div class="page-header">
+              <h3 class="page-title">
+                <div class="toast-body" id="toastmessage">
+                  welcome, {{ name }}
+                </div>
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+
+                      <div class="alert alert-primary" style="border-radius:25px;" id="load" role="alert">
+                       {{ message }}
+                      </div>
+
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
+                <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                  <i class="mdi mdi-home"></i>
+                </span> Dashboard
+              </h3>
+<!--              <nav aria-label="breadcrumb">-->
+<!--                <ul class="breadcrumb">-->
+<!--                  <li class="breadcrumb-item active" aria-current="page">-->
+<!--                    <span></span>Overview <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>-->
+<!--                  </li>-->
+<!--                </ul>-->
+<!--              </nav>-->
+            </div>
+            <div class="row">
+              <div class="col-md-4 stretch-card grid-margin">
+                <div class="card bg-gradient-danger card-img-holder text-white">
+                  <div class="card-body">
+                    <img src="{{ url_for('static', filename='assets/images/dashboard/circle.svg')}}" class="card-img-absolute" alt="circle-image" />
+                    <h4 class="font-weight-normal mb-3">Weekly Track <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                    </h4>
+                    <h2 class="mb-5">$ 15,0000</h2>
+                    <h6 class="card-text">Increased by 60%</h6>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 stretch-card grid-margin">
+                <div class="card bg-gradient-info card-img-holder text-white">
+                  <div class="card-body">
+                    <img src="{{ url_for('static', filename='assets/images/dashboard/circle.svg')}}" class="card-img-absolute" alt="circle-image" />
+                    <h4 class="font-weight-normal mb-3">Weekly log <i class="mdi mdi-bookmark-outline mdi-24px float-right"></i>
+                    </h4>
+                    <h2 class="mb-5">45,6334</h2>
+                    <h6 class="card-text">Decreased by 10%</h6>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 stretch-card grid-margin">
+                <div class="card bg-gradient-success card-img-holder text-white">
+                  <div class="card-body">
+                    <img src="{{ url_for('static', filename='assets/images/dashboard/circle.svg')}}" class="card-img-absolute" alt="circle-image" />
+                    <h4 class="font-weight-normal mb-3">Visitors Online <i class="mdi mdi-diamond mdi-24px float-right"></i>
+                    </h4>
+                    <h2 class="mb-5">95,5741</h2>
+                    <h6 class="card-text">Increased by 5%</h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-7 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="clearfix">
+                      <h4 class="card-title float-left">Video feed</h4>
+                      <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right"></div>
+                    </div>
+                    <canvas id="visit-sale-chart" class="mt-4"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Upload</h4>
+                    <div class="row">
+                      <div class="col-sm-12 text-center mt-5">
+                    <form action = "{{ url_for('main.upload_file') }}" method = "POST"
+                         enctype = "multipart/form-data">
+                         <input type="file" name="file" class="btn btn-primary btn-sm btn-rounded btn-md  pl-6 pr-6 pb-2 pt-2 mb-2 mr-5"  ><i class="fa fa-edit"></i> </input>
+                         <button type="submit" class="btn btn-success btn-lg btn-rounded btn-md  pl-6 pr-6  mb-2 mr-5"  ><i class="fa fa-edit"></i>Upload</button>
+                    </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row ">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Recent Track</h4>
+                      <button class="btn btn-primary btn-sm btn-rounded float-right pl-4 pr-4 pb-2 pt-2 mb-1 mr-5"   type="button" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add Data</button>
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th> id </th>
+                            <th> vehicle </th>
+                            <th> model </th>
+                            <th> color </th>
+                            <th> type </th>
+                            <th> number plate </th>
+                            <th> Date created </th>
+                            <th style="text-align:center">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {% for vehicle in data.items %}
+                          <tr>
+                            <td>
+                              {{ vehicle.id }}
+                            </td>
+                            <td>  {{ vehicle.vehicle }} </td>
+                            <td>  {{ vehicle.model }} </td>
+                            <td>
+                              {{ vehicle.color }}
+                            </td>
+                            <td> {{ vehicle.type }} </td>
+                            <td> {{ vehicle.number_plate }} </td>
+                            <td> {{ vehicle.date_created }} </td>
+                            <td>
+
+                              <ul class="list-inline m-0">
+<!--                                <li class="list-inline-item">-->
+<!--                                    <button class="btn btn-primary btn-sm btn-rounded"  type="button" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add</button>-->
+<!--                                </li>-->
+                                <li class="list-inline-item">
+                                    <a class="btn btn-success btn-sm btn-rounded" href="{{ url_for('main.vehicle_updates', vehicle_id=vehicle.id) }}" type="button"  title="Edit"><i class="fa fa-edit"></i>edit</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="btn btn-danger btn-sm btn-rounded"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button"  title="Delete"><i class="fa fa-trash"></i>delete</a>
+                                </li>
+                            </ul>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                        </tbody>
+                      </table>
+                        {% for page_num in data.iter_pages(left_edge=1, right_edge=1,
+                          left_current=1, right_current=2) %} {% if page_num %} {% if data.page ==
+                          page_num %}
+                          <a
+                            class="btn btn-info btn-sm btn-rounded p-6 mt-2"
+                            href="{{ url_for('main.dashboard', page=page_num) }}"
+                            >{{ page_num }}</a
+                          >
+                          {% else %}
+                          <a
+                            class="btn btn-outline btn-sm btn-rounded p-6 mt-2"
+                            href="{{ url_for('main.dashboard', page=page_num) }}"
+                            >{{ page_num }}</a
+                          >
+                          {% endif %} {% else %} ... {% endif %} {% endfor %}
+
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+<!--          <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
+<!--    <div class="modal-dialog" role="document">-->
+<!--      <div class="modal-content">-->
+<!--        <div class="modal-header">-->
+<!--          <h5 class="modal-title" id="exampleModalLabel">Edit Details</h5>-->
+<!--          <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--            <span aria-hidden="true">&times;</span>-->
+<!--          </button>-->
+<!--        </div>-->
+<!--        <div class="modal-body">-->
+<!--          <form class="pt-3" action="" method="POST">-->
+<!--            <div class="form-group">-->
+<!--              <input type="hidden" name="id" value="id" >-->
+<!--              <input type="text" name="vehicle" class="form-control form-control-lg" value="" id="exampleInputvehicle" placeholder="vehicle" required>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--              <input type="text" name="model" class="form-control form-control-lg" value="" id="exampleInputmodel" placeholder="model" required>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--              <input type="text" name="color" class="form-control form-control-lg" value="" id="exampleInputcolor" placeholder="color" required >-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--              <input type="text" name="type" class="form-control form-control-lg" value="" id="exampleInputtype" placeholder="type" required>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--              <input type="text" name="numberplate" class="form-control form-control-lg" value="" id="exampleInputnumberplate" placeholder="number plate" required>-->
+<!--            </div>-->
+<!--            <div class="mt-3">-->
+<!--              <button class="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn" type="submit">Update</button>-->
+<!--            </div>-->
+
+<!--          </form>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+  <div class="modal fade" id="exampleModaladd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabeladd">Add Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="pt-3" action="/post" method="POST">
+            <div class="form-group">
+              <input type="hidden" name="id" value="id" >
+              <input type="text" name="vehicle" class="form-control form-control-lg"  placeholder="vehicle" required>
+            </div>
+            <div class="form-group">
+              <input type="text" name="model" class="form-control form-control-lg"  placeholder="model" required>
+            </div>
+            <div class="form-group">
+              <input type="text" name="color" class="form-control form-control-lg"  placeholder="color" required >
+            </div>
+            <div class="form-group">
+              <input type="text" name="type" class="form-control form-control-lg"  placeholder="type" required>
+            </div>
+            <div class="form-group">
+              <input type="text" name="numberplate" class="form-control form-control-lg"  placeholder="number plate" required>
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn" type="submit">add</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+          <!-- content-wrapper ends -->
+          <!-- partial:partials/_footer.html -->
+  {% endblock %}
