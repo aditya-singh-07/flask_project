@@ -15,16 +15,16 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='assets/images/favicon.ico')}}" />
   </head>
   <script>
-<!--    $('#exampleModaladd').on('show.bs.modal', function (event) {-->
-<!--var button = $(event.relatedTarget) // Button that triggered the modal-->
-<!--var recipient = button.data('whatever') // Extract info from data-* attributes-->
-<!--var modal = $(this)-->
-<!--modal.find('.modal-title').text('New message to ' + recipient)-->
-<!--modal.find('.modal-body input').val(recipient)-->
-<!--})-->
-<!--    $(function () {-->
-<!--  $('[data-toggle="tooltip"]').tooltip();-->
-<!--});-->
+// <!--    $('#exampleModaladd').on('show.bs.modal', function (event) {-->
+// <!--var button = $(event.relatedTarget) // Button that triggered the modal-->
+// <!--var recipient = button.data('whatever') // Extract info from data-* attributes-->
+// <!--var modal = $(this)-->
+// <!--modal.find('.modal-title').text('New message to ' + recipient)-->
+// <!--modal.find('.modal-body input').val(recipient)-->
+// <!--})-->
+// <!--    $(function () {-->
+// <!--  $('[data-toggle="tooltip"]').tooltip();-->
+// <!--});-->
 
 function hideLoading() {
   setTimeout(function(){
@@ -102,12 +102,12 @@ function hideLoading() {
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
           <ul class="nav">
             <li class="nav-item">
-              <a class="nav-link" href="index.html">
+              <a class="nav-link" href="{{ url_for('main.dashboard')}}">
                 <span class="menu-title">Dashboard</span>
                 <i class="mdi mdi-home menu-icon"></i>
               </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
                 <span class="menu-title">Login</span>
                 <i class="menu-arrow"></i>
@@ -121,7 +121,7 @@ function hideLoading() {
  
                 </ul>
               </div>
-            </li>
+            </li> -->
 
           </ul>
         </nav>

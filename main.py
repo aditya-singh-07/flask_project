@@ -25,7 +25,7 @@ def dashboard():
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle = user.vehicledata
-    vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=5)
+    vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
 
     return render_template('index.html', data=vehicle_pagination, name=current_user.username)
 

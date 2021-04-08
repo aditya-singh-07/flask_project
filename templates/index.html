@@ -90,8 +90,8 @@
                       <div class="col-sm-12 text-center mt-5">
                     <form action = "{{ url_for('main.upload_file') }}" method = "POST"
                          enctype = "multipart/form-data">
-                         <input type="file" name="file" class="btn btn-primary btn-sm btn-rounded btn-md  pl-6 pr-6 pb-2 pt-2 mb-2 mr-5"  ><i class="fa fa-edit"></i> </input>
-                         <button type="submit" class="btn btn-success btn-lg btn-rounded btn-md  pl-6 pr-6  mb-2 mr-5"  ><i class="fa fa-edit"></i>Upload</button>
+                         <input type="file" name="file" class="btn btn-primary btn-lg btn-rounded btn-md  pl-6 pr-6 pb-2 pt-3 pb-3 mb-2 mr-5"  style="background-color:#b66dff;border: 0px;"  ><i class="fa fa-edit"></i> </input>
+                         <button type="submit" class="btn btn-success btn-lg btn-rounded btn-md  pl-6 pr-6  mb-2 mr-5" style="background-color:#1bcfb4;border: 0px;height: 50px; width:100%;" ><i class="fa fa-edit"></i>Upload</button>
                     </form>
                       </div>
                     </div>
@@ -105,7 +105,8 @@
                 <div class="card">
                   <div class="card-body">
                     <h4 class="card-title">Recent Track</h4>
-                      <button class="btn btn-primary btn-sm btn-rounded float-right pl-4 pr-4 pb-2 pt-2 mb-1 mr-5"   type="button" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add Data</button>
+                      <!-- <button class="btn btn-primary btn-sm btn-rounded float-right pl-4 pr-4 pb-2 pt-2 mb-1 mr-5"   type="button" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add Data</button> -->
+                      <a class="btn btn-gradient-info btn-sm btn-rounded btn-sm float-right  pl-4 pr-4 pb-2 pt-2 mb-1 mr-5" style="border: 1px solid;" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add data</a>
                     <div class="table-responsive">
                       <table class="table">
                         <thead>
@@ -141,10 +142,12 @@
 <!--                                    <button class="btn btn-primary btn-sm btn-rounded"  type="button" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add</button>-->
 <!--                                </li>-->
                                 <li class="list-inline-item">
-                                    <a class="btn btn-success btn-sm btn-rounded" href="{{ url_for('main.vehicle_updates', vehicle_id=vehicle.id) }}" type="button"  title="Edit"><i class="fa fa-edit"></i>edit</a>
+                                  <a class="btn btn-gradient-success btn-sm btn-rounded btn-sm  " style="border: 0px;" href="{{ url_for('main.vehicle_updates', vehicle_id=vehicle.id) }}" type="button" title="Edit"><i class="fa fa-edit"></i>Edit</a>
+                                    <!-- <a class="btn btn-success btn-sm btn-rounded" href="{{ url_for('main.vehicle_updates', vehicle_id=vehicle.id) }}" type="button"  title="Edit"><i class="fa fa-edit"></i>edit</a> -->
                                 </li>
                                 <li class="list-inline-item">
-                                    <a class="btn btn-danger btn-sm btn-rounded"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button"  title="Delete"><i class="fa fa-trash"></i>delete</a>
+                                  <a class="btn btn-gradient-danger btn-sm btn-sm btn-rounded " style="border: 0px;"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button" title="Delete"><i class="fa fa-trash"></i>delete</a>
+                                    <!-- <a class="btn btn-danger btn-sm btn-rounded"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button"  title="Delete"><i class="fa fa-trash"></i>delete</a> -->
                                 </li>
                             </ul>
                             </td>
@@ -156,13 +159,13 @@
                           left_current=1, right_current=2) %} {% if page_num %} {% if data.page ==
                           page_num %}
                           <a
-                            class="btn btn-info btn-sm btn-rounded p-6 mt-2"
+                            class="btn btn-primary btn-sm btn-rounded p-6 mt-2 " style="border: 0px; background-color:#b66dff"
                             href="{{ url_for('main.dashboard', page=page_num) }}"
                             >{{ page_num }}</a
                           >
                           {% else %}
                           <a
-                            class="btn btn-outline btn-sm btn-rounded p-6 mt-2"
+                            class="btn btn-outline btn-sm btn-rounded p-6 mt-2" style="border: 0px;"
                             href="{{ url_for('main.dashboard', page=page_num) }}"
                             >{{ page_num }}</a
                           >
