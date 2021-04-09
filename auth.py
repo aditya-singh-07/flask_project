@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import  login_user, logout_user, login_required
 from .model import User,db
@@ -21,6 +21,7 @@ def login_post():
     if not user or not check_password_hash(user.password,password):
         return redirect('auth.login')
     login_user(user, remember=remember)
+    flash("Welcome")
     return redirect(url_for('main.dashboard'))
 
 @auth.route('/signup')
