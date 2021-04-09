@@ -14,17 +14,17 @@ import ssl
 import numpy as np
 import cv2
 import http.client as httplib
-import mysql.connector
+#import mysql.connector
 import datetime
 import pathlib
 
 # //////////////////
-mydb = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="",
-  database="vehicle-detection"
-)
+# mydb = mysql.connector.connect(
+#   host="localhost",
+#   user="root",
+#   password="",
+#   database="vehicle-detection"
+# )
 #google_maps = GoogleMaps(api_key="AIzaSyA0Dx_boXQiwvdz8sJHoYeZNVTdoWONYkU")
 
 
@@ -180,20 +180,22 @@ def renderJSON(json_v):
     vehicle_number_plate = data["number_plate"].upper();
     date = datetime.datetime.now();
 
-    if (mydb):
-        print("connected with database ")
-    mycursor = mydb.cursor()
-
-    sql = "INSERT INTO vehicle_data (user_id,vehicle,model,color,type,number_plate,date_created) VALUES (1,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
-    val = {'user_id': "1",
-           'vehicle': vehicle_name,
-           'model': vehicle_model,
-           'color': vehicle_color,
-           'type': vehicle_type,
-           'number_plate': vehicle_number_plate,
-           'date_created': date
-           }
-    print(val)
+    # if (mydb):
+    #     print("connected with database ")
+    # mycursor = mydb.cursor()
+    # sql = "INSERT INTO vehicle_data (user_id,vehicle,model,color,type,number_plate,date_created) VALUES (1,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
+    # val = {'user_id': "1",
+    #        'vehicle': vehicle_name,
+    #        'model': vehicle_model,
+    #        'color': vehicle_color,
+    #        'type': vehicle_type,
+    #        'number_plate': vehicle_number_plate,
+    #        'date_created': date
+    #        }
+    sql = VehicleData(current_user.id, vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date)
+    db.session.add(sql)
+    db.session.commit()
+    #print(val)
     # g = geocoder.ip('me')
     # lat=g.lat
     # lng=g.lng
@@ -201,8 +203,8 @@ def renderJSON(json_v):
     # print(lng)
     # my_location = google_maps.search(lat=lat, lng=lng).first()
     # print(my_location)
-    mycursor.execute(sql, val)
-    mydb.commit()
+    # mycursor.execute(sql, val)
+    # mydb.commit()
 
     # ------------------------CAR-------------------------------------------------------
 
