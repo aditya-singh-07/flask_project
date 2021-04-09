@@ -21,7 +21,7 @@ def login_post():
     if not user or not check_password_hash(user.password,password):
         return redirect('auth.login')
     login_user(user, remember=remember)
-    flash("Welcome")
+    # flash("Welcome")
     return redirect(url_for('main.dashboard'))
 
 @auth.route('/signup')

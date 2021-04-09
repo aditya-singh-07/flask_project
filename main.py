@@ -30,6 +30,7 @@ import pathlib
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -41,6 +42,9 @@ main = Blueprint('main', __name__)
 # def index():
 #     return render_template('index.html')
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @main.route('/dashboard')
 @login_required
@@ -216,35 +220,39 @@ def renderJSON(json_v):
 def upload_file():
     if request.method == 'POST':
         f = request.files['file']
-        if f.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        filename = secure_filename(f.filename)
-        file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
-        if file.exists():
-            os.remove(UPLOAD_FOLDER + "/" + 'testimage.png')
-        f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        os.rename(UPLOAD_FOLDER+"/"+filename, UPLOAD_FOLDER+"/"+'testimage.png')
-        # f.save(secure_filename(f.filename))
-        #flash("Uploaded Successfully")
-        file = pathlib.Path(UPLOAD_FOLDER+"/"+'testimage.png')
-        if file.exists():
-            print("File exist")
-            car_image = "./uploads/testimage.png"
+        if f.filename != '':
+            filename = secure_filename(f.filename)
+            file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
+            if file.exists():
+                os.remove(UPLOAD_FOLDER + "/" + 'testimage.png')
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            os.rename(UPLOAD_FOLDER + "/" + filename, UPLOAD_FOLDER + "/" + 'testimage.png')
+            # f.save(secure_filename(f.filename))
+            # flash("Uploaded Successfully")
+            file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
+            if file.exists():
+                print("File exist")
+                car_image = "./uploads/testimage.png"
 
-            # Contacting External Server
-            response = findCar(car_image)
+                # Contacting External Server
+                response = findCar(car_image)
 
-            # Converting their Response to JSON
-            json_response = json.loads(response)
+                # Converting their Response to JSON
+                json_response = json.loads(response)
 
-            # Processing that JSON for our Parameters
-            print(json_response)
+                # Processing that JSON for our Parameters
+                print(json_response)
 
-            renderJSON(json_response)
-            flash("recognized Success")
+                renderJSON(json_response)
+                flash("recognized Success")
+            else:
+                print("File not exist")
+            # Car Image to be Processed
+
+            return redirect(url_for('main.dashboard'))
         else:
-            print("File not exist")
-        #Car Image to be Processed
+            flash(" Please select images")
+            return redirect(url_for('main.dashboard'))
 
-        return redirect(url_for('main.dashboard'))
+
+
