@@ -37,7 +37,9 @@
               <div class="col-12 grid-margin">
                 <div class="card">
                   <div class="card-body">
+                                {% if data.items %}
                     <h4 class="card-title">Activity Log</h4>
+                                {% endif %}
                       <!-- <button class="btn btn-primary btn-sm btn-rounded float-right pl-4 pr-4 pb-2 pt-2 mb-1 mr-5"   type="button" data-toggle="modal" data-target="#exampleModaladd" value="add" title="Edit"><i class="fa fa-edit"></i>Add Data</button> -->
                     <div class="input-group rounded">
 <!--                        <form method="post" action="/search">-->
@@ -56,17 +58,21 @@
                 </script>
 
                     <table id="example" class="table table-striped"" style="width:100%">
-        <thead>
-                 {% if data %}
-            <tr>
-              <th> id </th>
-                <th> Author </th>
-                <th> Action Changes </th>
-                <th> Ip Address </th>
-                <th> Date created </th>
-            </tr>
-              {% endif %}
-        </thead>
+               {% if data.items %}
+                      <thead>
+
+                    <tr>
+                      <th> id </th>
+                        <th> Author </th>
+                        <th> Action Changes </th>
+                        <th> Ip Address </th>
+                        <th> Date created </th>
+                    </tr>
+                    </thead>
+            {% else %}
+                    <h6 >No Record found</h6>
+                 {% endif %}
+
         <tbody>
         {% if data %}
              {% for vehicle in data.items %}

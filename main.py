@@ -1,4 +1,5 @@
 import os
+import socket
 
 from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify
 from flask_login import login_required, current_user
@@ -75,8 +76,7 @@ def vehicle_post():
     numberplate = request.form.get('numberplate')
     date_created = date.today()
     print(vehicle, model, color, type, numberplate, date_created)
-    user = User.query.filter_by(email=current_user.email).first_or_404()
-    vehicle_post = VehicleData(user.id, vehicle, model, color, type, numberplate, date_created)
+    vehicle_post = VehicleData(current_user.id, vehicle, model, color, type, numberplate, date_created)
     change="Added Vehicle"
     log=Activitylog(user.id,current_user.username,change,"192.168.0.1",date_created)
     db.session.add(log)
@@ -98,8 +98,9 @@ def vehicle_updates(vehicle_id):
         vehicle_details.numberplate = request.form['numberplate']
         vehicle_details.date_created = date.today()
         change = "Updated Vehicle "
-        user = User.query.filter_by(email=current_user.email).first_or_404()
-        log = Activitylog(user.id, current_user.username, change, "192.168.0.1",  date.today())
+        hostname = socket.gethostname()
+        IP = socket.gethostbyname(hostname)
+        log = Activitylog(current_user.id, current_user.username, change, IP,  date.today())
         db.session.add(log)
         db.session.add(vehicle_details)
         db.session.commit()
@@ -113,6 +114,11 @@ def vehicle_updates(vehicle_id):
 def vehicle_delete(vehicle_id):
     vehicle_details = VehicleData.query.get_or_404(vehicle_id)
     db.session.delete(vehicle_details)
+    change = "Deleted Vehicle "
+    hostname = socket.gethostname()
+    IP = socket.gethostbyname(hostname)
+    log = Activitylog(current_user.id, current_user.username, change, IP, date.today())
+    db.session.add(log)
     db.session.commit()
     flash("Successfully Deleted!!")
     return redirect(url_for('main.dashboard'))
@@ -205,8 +211,9 @@ def renderJSON(json_v):
     #        }
     sql = VehicleData(current_user.id, vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date)
     change = "Recognized Vehicle "
-    user = User.query.filter_by(email=current_user.email).first_or_404()
-    log = Activitylog(user.id, current_user.username, change, "192.168.0.1", date.today())
+    hostname = socket.gethostname()
+    IP = socket.gethostbyname(hostname)
+    log = Activitylog(current_user.id, current_user.username, change, IP, date.today())
     db.session.add(log)
     db.session.add(sql)
     db.session.commit()
