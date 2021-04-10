@@ -1,10 +1,10 @@
 import os
 
-from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask
+from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify
 from flask_login import login_required, current_user
 from datetime import date
 from werkzeug.utils import secure_filename
-from .model import User, db, VehicleData
+from .model import User, db, VehicleData, Activitylog
 
 # //////////////////
 import base64
@@ -77,6 +77,9 @@ def vehicle_post():
     print(vehicle, model, color, type, numberplate, date_created)
     user = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle_post = VehicleData(user.id, vehicle, model, color, type, numberplate, date_created)
+    change="Added Vehicle"
+    log=Activitylog(user.id,current_user.username,change,"192.168.0.1",date_created)
+    db.session.add(log)
     db.session.add(vehicle_post)
     db.session.commit()
     flash("added successfully!!")
@@ -94,6 +97,10 @@ def vehicle_updates(vehicle_id):
         vehicle_details.type = request.form['type']
         vehicle_details.numberplate = request.form['numberplate']
         vehicle_details.date_created = date.today()
+        change = "Updated Vehicle "
+        user = User.query.filter_by(email=current_user.email).first_or_404()
+        log = Activitylog(user.id, current_user.username, change, "192.168.0.1",  date.today())
+        db.session.add(log)
         db.session.add(vehicle_details)
         db.session.commit()
         flash("Successfully updated!!")
@@ -197,6 +204,10 @@ def renderJSON(json_v):
     #        'date_created': date
     #        }
     sql = VehicleData(current_user.id, vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date)
+    change = "Recognized Vehicle "
+    user = User.query.filter_by(email=current_user.email).first_or_404()
+    log = Activitylog(user.id, current_user.username, change, "192.168.0.1", date.today())
+    db.session.add(log)
     db.session.add(sql)
     db.session.commit()
     #print(val)
@@ -254,5 +265,30 @@ def upload_file():
             flash(" Please select images")
             return redirect(url_for('main.dashboard'))
 
+@main.route('/activity')
+@login_required
+def activitylog():
+    page = request.args.get('page', 1, type=int)
+    user = User.query.filter_by(email=current_user.email).first_or_404()
+    #vehicle = user.activitylog
+    vehicle_pagination = Activitylog.query.filter_by(author=user).paginate(page=page, per_page=5)
+    return  render_template('activity.html', data=vehicle_pagination)
 
+
+# @main.route("/search", methods=["POST","GET"])
+# @login_required
+# def search():
+#     searchbox = request.form.get("search_text")
+#     search = "%{}%".format(searchbox)
+#     vehicle_found = VehicleData.query.filter(VehicleData.vehicle.like(search)).all()
+#     return render_template('index.html',data=vehicle_found)
+
+@main.route("/search", methods=["POST","GET"])
+@login_required
+def search():
+    searchbox = request.form.get("search_text")
+    search = "%{}%".format(searchbox)
+    page = request.args.get('page', 1, type=int)
+    vehicle_pagination = VehicleData.query.filter(VehicleData.vehicle.like(search)).paginate(page=page, per_page=3)
+    return render_template('index.html', data=vehicle_pagination, name=current_user.username)
 
