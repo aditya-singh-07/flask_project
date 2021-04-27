@@ -75,7 +75,11 @@
                   <div class="card-body">
                     <div class="clearfix">
                       <h4 class="card-title float-left">Video feed</h4>
-                      <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right"></div>
+                      <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right">
+                           <img src="{{ url_for('main.video_feed') }}" width="100%">
+
+                        <h1> </h1>
+                      </div>
                     </div>
                     <canvas id="visit-sale-chart" class="mt-4"></canvas>
                   </div>

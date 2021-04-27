@@ -1,7 +1,8 @@
 import os
 import socket
-
-from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify
+import mysql
+from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify, Response, \
+    stream_with_context
 from flask_login import login_required, current_user
 from datetime import date
 from werkzeug.utils import secure_filename
@@ -15,25 +16,24 @@ import ssl
 import numpy as np
 import cv2
 import http.client as httplib
-#import mysql.connector
+import mysql.connector
 import datetime
 import pathlib
 
 # //////////////////
-# mydb = mysql.connector.connect(
-#   host="localhost",
-#   user="root",
-#   password="",
-#   database="vehicle-detection"
-# )
-#google_maps = GoogleMaps(api_key="AIzaSyA0Dx_boXQiwvdz8sJHoYeZNVTdoWONYkU")
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="vehicle-detection"
+)
+# google_maps = GoogleMaps(api_key="AIzaSyA0Dx_boXQiwvdz8sJHoYeZNVTdoWONYkU")
 
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 main = Blueprint('main', __name__)
 
@@ -47,11 +47,13 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 @main.route('/dashboard')
 @login_required
 def dashboard():
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(email=current_user.email).first_or_404()
+
     vehicle = user.vehicledata
     vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
 
@@ -77,8 +79,8 @@ def vehicle_post():
     date_created = date.today()
     print(vehicle, model, color, type, numberplate, date_created)
     vehicle_post = VehicleData(current_user.id, vehicle, model, color, type, numberplate, date_created)
-    change="Added Vehicle"
-    log=Activitylog(user.id,current_user.username,change,"192.168.0.1",date_created)
+    change = "Added Vehicle"
+    log = Activitylog(current_user.id, current_user.username, change, "192.168.0.1", date_created)
     db.session.add(log)
     db.session.add(vehicle_post)
     db.session.commit()
@@ -100,7 +102,7 @@ def vehicle_updates(vehicle_id):
         change = "Updated Vehicle "
         hostname = socket.gethostname()
         IP = socket.gethostbyname(hostname)
-        log = Activitylog(current_user.id, current_user.username, change, IP,  date.today())
+        log = Activitylog(current_user.id, current_user.username, change, IP, date.today())
         db.session.add(log)
         db.session.add(vehicle_details)
         db.session.commit()
@@ -197,27 +199,28 @@ def renderJSON(json_v):
     vehicle_number_plate = data["number_plate"].upper();
     date = datetime.datetime.now();
 
-    # if (mydb):
-    #     print("connected with database ")
-    # mycursor = mydb.cursor()
-    # sql = "INSERT INTO vehicle_data (user_id,vehicle,model,color,type,number_plate,date_created) VALUES (1,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
-    # val = {'user_id': "1",
-    #        'vehicle': vehicle_name,
-    #        'model': vehicle_model,
-    #        'color': vehicle_color,
-    #        'type': vehicle_type,
-    #        'number_plate': vehicle_number_plate,
-    #        'date_created': date
-    #        }
-    sql = VehicleData(current_user.id, vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date)
-    change = "Recognized Vehicle "
-    hostname = socket.gethostname()
-    IP = socket.gethostbyname(hostname)
-    log = Activitylog(current_user.id, current_user.username, change, IP, date.today())
-    db.session.add(log)
-    db.session.add(sql)
-    db.session.commit()
-    #print(val)
+    if (mydb):
+        print("connected with database ")
+    mycursor = mydb.cursor()
+    sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
+    val = {
+        'vehicle': vehicle_name,
+        'model': vehicle_model,
+        'color': vehicle_color,
+        'type': vehicle_type,
+        'number_plate': vehicle_number_plate,
+        'date_created': date
+    }
+
+    # sql = VehicleData(4, vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date)
+    # change = "Recognized Vehicle "
+    # hostname = socket.gethostname()
+    # IP = socket.gethostbyname(hostname)
+    # log = Activitylog(4, current_user.username, change, IP, date.today())
+    # db.session.add(log)
+    # db.session.add(sql)
+    # db.session.commit()
+    # print(val)
     # g = geocoder.ip('me')
     # lat=g.lat
     # lng=g.lng
@@ -225,8 +228,8 @@ def renderJSON(json_v):
     # print(lng)
     # my_location = google_maps.search(lat=lat, lng=lng).first()
     # print(my_location)
-    # mycursor.execute(sql, val)
-    # mydb.commit()
+    mycursor.execute(sql, val)
+    mydb.commit()
 
     # ------------------------CAR-------------------------------------------------------
 
@@ -272,14 +275,15 @@ def upload_file():
             flash(" Please select images")
             return redirect(url_for('main.dashboard'))
 
+
 @main.route('/activity')
 @login_required
 def activitylog():
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(email=current_user.email).first_or_404()
-    #vehicle = user.activitylog
+    # vehicle = user.activitylog
     vehicle_pagination = Activitylog.query.filter_by(author=user).paginate(page=page, per_page=5)
-    return  render_template('activity.html', data=vehicle_pagination)
+    return render_template('activity.html', data=vehicle_pagination)
 
 
 # @main.route("/search", methods=["POST","GET"])
@@ -290,7 +294,7 @@ def activitylog():
 #     vehicle_found = VehicleData.query.filter(VehicleData.vehicle.like(search)).all()
 #     return render_template('index.html',data=vehicle_found)
 
-@main.route("/search", methods=["POST","GET"])
+@main.route("/search", methods=["POST", "GET"])
 @login_required
 def search():
     searchbox = request.form.get("search_text")
@@ -298,4 +302,99 @@ def search():
     page = request.args.get('page', 1, type=int)
     vehicle_pagination = VehicleData.query.filter(VehicleData.vehicle.like(search)).paginate(page=page, per_page=3)
     return render_template('index.html', data=vehicle_pagination, name=current_user.username)
+
+
+# camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture('D:/Project/flask-project/venv/flask_project/video/cars3.mp4')
+
+
+def snapshot(frame, ctr):
+    cv2.imwrite("D:/Project/flask-project/cardetect/Snaphots/ss" + str(ctr) + ".jpg", frame)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(frame, "Taking Snapshot", (15, 15), font, 0.5, (255, 255, 255), 1)
+    cv2.imshow('Vehicle Detection System - Snapshot Screen', frame)
+    return True
+
+
+def gen_frames():  # generate frame by frame from camera
+    ctr = 0
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    # Turn to TRUE to send stream to API
+    carRecogMode = True
+
+    car_cascade = cv2.CascadeClassifier('cars4.xml')
+    while True:
+        count = 0
+        # Capture frame-by-frame
+        ret, frame = camera.read()  # read the camera frame
+        if not ret:
+            break
+        else:
+
+            # ret, buffer = cv2.imencode('.jpg', frame)
+            #
+            # frame = buffer.tobytes()
+            imgencode = cv2.imencode('.jpg', frame)[1].tobytes()
+            # stringData = imgencode.tostring()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + imgencode + b'\r\n')  # concat frame one by one and show result
+
+            cv2.imwrite("D:/Project/flask-project/venv/flask_project/Frames/f" + str(ctr) + ".jpg", frame)
+            # cv2.imwrite("Frames/f" + str(ctr) + ".jpg", frame)
+            response = findCar("D:/Project/flask-project/venv/flask_project/Frames/f" + str(ctr) + ".jpg")
+
+            # Converting their Response to JSON
+            json_response = json.loads(response)
+
+            # Processing that JSON for our Parameters
+            print(json_response)
+            count=count+1
+
+            data = renderJSON(json_response)
+
+            if data["car_color"] != False:
+                yield (data["car_color"]["name"])
+                cv2.putText(frame, data["car_color"]["name"], (10, 60), font, 1, (0, 0, 0), 3)
+
+                print(data["car_color"]["name"])
+
+            if data["number_plate"] != False:
+                # LPN
+                cv2.putText(frame, str(data["number_plate"]), (10, 100), font, 1, (255, 146, 0), 3)
+                print(str(data["number_plate"]))
+
+            # display the resulting frame
+            # cv2.imshow('Vehicle Detection System - Live Camera Footage', frame)
+            ctr = ctr + 1
+
+            # -------------------------------------------
+
+            # press Q on keyboard to exit---------------
+            c = cv2.waitKey(25)
+            # print("NOT EXITING: Q is not Pressed!")
+
+            if c == ord('q'):
+                # print("EXITING: Q is Pressed!")
+                break
+            if c == ord('s'):
+                snapshot(frame, ctr)
+            # -------------------------------------------
+
+        # ------------------------------------------------------------------------
+
+        # release the videocapture object
+
+        camera.release()
+        # close all the frames
+        cv2.destroyAllWindows()
+
+
+
+
+@main.route('/video_feed')
+def video_feed():
+    # Video streaming route. Put this in the src attribute of an img tag
+
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
