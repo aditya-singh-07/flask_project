@@ -1,8 +1,10 @@
 import os
 import socket
+import time
+
 import mysql
 from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify, Response, \
-    stream_with_context
+    stream_with_context, make_response
 from flask_login import login_required, current_user
 from datetime import date
 from werkzeug.utils import secure_filename
@@ -56,7 +58,6 @@ def dashboard():
 
     vehicle = user.vehicledata
     vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
-
     return render_template('index.html', data=vehicle_pagination, name=current_user.username)
 
 
@@ -230,7 +231,7 @@ def renderJSON(json_v):
     # print(my_location)
     mycursor.execute(sql, val)
     mydb.commit()
-
+    flash("Successfully Detected")
     # ------------------------CAR-------------------------------------------------------
 
     return data
@@ -316,6 +317,64 @@ def snapshot(frame, ctr):
     return True
 
 
+def renderJSON_video(json_v):
+    # ------------------------CAR-------------------------------------------------------
+    count = 0
+    # Forming Data
+    data = {}
+
+    # Car Make
+    data["car_make"] = json_v["objects"][0]["vehicleAnnotation"]["attributes"]["system"]["make"]
+    print("Car Name :: " + data["car_make"]["name"].upper())
+
+    # Car Model
+    data["car_model"] = json_v["objects"][0]["vehicleAnnotation"]["attributes"]["system"]["model"]
+    print("Car Model :: " + data["car_model"]["name"].upper())
+
+    # Car Color
+    data["car_color"] = json_v["objects"][0]["vehicleAnnotation"]["attributes"]["system"]["color"]
+    print("Car Color :: " + data["car_color"]["name"].upper())
+
+    # Car Type
+    data["car_type"] = json_v["objects"][0]["vehicleAnnotation"]["attributes"]["system"]["vehicleType"]
+    print("Vehicle Type :: " + data["car_type"].upper())
+
+    # Number Plate
+    data["number_plate"] = json_v["objects"][0]["vehicleAnnotation"]["licenseplate"]["attributes"]["system"]["string"][
+        "name"]
+    data["number_plate_top_left"] = json_v["objects"][0]["vehicleAnnotation"]["licenseplate"]["bounding"]["vertices"][0]
+    data["number_plate_top_left"] = json_v["objects"][0]["vehicleAnnotation"]["licenseplate"]["bounding"]["vertices"][2]
+    print("Number Plate :: " + data["number_plate"].upper())
+
+    vehicle_name = data["car_make"]["name"].upper();
+    vehicle_model = data["car_model"]["name"].upper();
+    vehicle_color = data["car_color"]["name"].upper();
+    vehicle_type = data["car_type"].upper();
+    vehicle_number_plate = data["number_plate"].upper();
+    date = datetime.datetime.now();
+    count = count + 1
+    data["number_plate"] = json_v["objects"][0]["vehicleAnnotation"]["recognitionConfidence"]
+    # print("{:.1f}".format(data["number_plate"]))
+    if (mydb):
+        print("connected with database ")
+    mycursor = mydb.cursor()
+    sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
+    val = {
+        'vehicle': vehicle_name,
+        'model': vehicle_model,
+        'color': vehicle_color,
+        'type': vehicle_type,
+        'number_plate': vehicle_number_plate,
+        'date_created': date
+    }
+    mycursor.execute(sql, val)
+    mydb.commit()
+
+    # ------------------------CAR-------------------------------------------------------
+
+    return data
+
+
 def gen_frames():  # generate frame by frame from camera
     ctr = 0
 
@@ -325,7 +384,6 @@ def gen_frames():  # generate frame by frame from camera
 
     car_cascade = cv2.CascadeClassifier('cars4.xml')
     while True:
-        count = 0
         # Capture frame-by-frame
         ret, frame = camera.read()  # read the camera frame
         if not ret:
@@ -349,9 +407,8 @@ def gen_frames():  # generate frame by frame from camera
 
             # Processing that JSON for our Parameters
             print(json_response)
-            count=count+1
 
-            data = renderJSON(json_response)
+            data = renderJSON_video(json_response)
 
             if data["car_color"] != False:
                 yield (data["car_color"]["name"])
@@ -385,16 +442,17 @@ def gen_frames():  # generate frame by frame from camera
 
         # release the videocapture object
 
-        camera.release()
+        # camera.release()
         # close all the frames
-        cv2.destroyAllWindows()
-
-
+        # cv2.destroyAllWindows()
 
 
 @main.route('/video_feed')
 def video_feed():
-    # Video streaming route. Put this in the src attribute of an img tag
-
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# @main.route('/video_feed', methods=["POST", "GET"])
+# def video_response():
+#     user = User.query.filter_by(email=current_user.email).first_or_404()
+#     vehicle = "KWFHBLWKB"
+#     return render_template('index.html', data=vehicle)
