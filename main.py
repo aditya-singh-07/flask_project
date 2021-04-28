@@ -345,7 +345,7 @@ def renderJSON_video(json_v):
     data["number_plate_top_left"] = json_v["objects"][0]["vehicleAnnotation"]["licenseplate"]["bounding"]["vertices"][0]
     data["number_plate_top_left"] = json_v["objects"][0]["vehicleAnnotation"]["licenseplate"]["bounding"]["vertices"][2]
     print("Number Plate :: " + data["number_plate"].upper())
-
+    global vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date
     vehicle_name = data["car_make"]["name"].upper();
     vehicle_model = data["car_model"]["name"].upper();
     vehicle_color = data["car_color"]["name"].upper();
@@ -355,20 +355,20 @@ def renderJSON_video(json_v):
     count = count + 1
     data["number_plate"] = json_v["objects"][0]["vehicleAnnotation"]["recognitionConfidence"]
     # print("{:.1f}".format(data["number_plate"]))
-    if (mydb):
-        print("connected with database ")
-    mycursor = mydb.cursor()
-    sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
-    val = {
-        'vehicle': vehicle_name,
-        'model': vehicle_model,
-        'color': vehicle_color,
-        'type': vehicle_type,
-        'number_plate': vehicle_number_plate,
-        'date_created': date
-    }
-    mycursor.execute(sql, val)
-    mydb.commit()
+    # if (mydb):
+    #     print("connected with database ")
+    # mycursor = mydb.cursor()
+    # sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
+    # val = {
+    #     'vehicle': vehicle_name,
+    #     'model': vehicle_model,
+    #     'color': vehicle_color,
+    #     'type': vehicle_type,
+    #     'number_plate': vehicle_number_plate,
+    #     'date_created': date
+    # }
+    # mycursor.execute(sql, val)
+    # mydb.commit()
 
     # ------------------------CAR-------------------------------------------------------
 
@@ -412,7 +412,7 @@ def gen_frames():  # generate frame by frame from camera
 
             if data["car_color"] != False:
                 yield (data["car_color"]["name"])
-                cv2.putText(frame, data["car_color"]["name"], (10, 60), font, 1, (0, 0, 0), 3)
+                cv2.putText(frame, data["car_color"]["name"], (15, 60), font, 1, (0, 0, 0), 3)
 
                 print(data["car_color"]["name"])
 
@@ -451,8 +451,32 @@ def gen_frames():  # generate frame by frame from camera
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# @main.route('/video_feed', methods=["POST", "GET"])
-# def video_response():
-#     user = User.query.filter_by(email=current_user.email).first_or_404()
-#     vehicle = "KWFHBLWKB"
-#     return render_template('index.html', data=vehicle)
+
+@main.route('/video_process', methods=["POST", "GET"])
+def video_response():
+    camera.release()
+    cv2.destroyAllWindows()
+    if (mydb):
+        print("connected with database ")
+    mycursor = mydb.cursor()
+    sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
+    val = {
+        'vehicle': vehicle_name,
+        'model': vehicle_model,
+        'color': vehicle_color,
+        'type': vehicle_type,
+        'number_plate': vehicle_number_plate,
+        'date_created': date
+    }
+    mycursor.execute(sql, val)
+    mydb.commit()
+    page = request.args.get('page', 1, type=int)
+    user = User.query.filter_by(email=current_user.email).first_or_404()
+    vehicle = user.vehicledata
+    vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
+    return render_template('index.html', response='ok', data=vehicle_pagination, name=current_user.username)
+
+
+@main.route('/video_restart', methods=["POST", "GET"])
+def video_restart():
+    return redirect(url_for('main.dashboard'))
