@@ -53,6 +53,8 @@ def allowed_file(filename):
 @main.route('/dashboard')
 @login_required
 def dashboard():
+    if camera is None or not camera.isOpened():
+        print(" Camera not working")
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(email=current_user.email).first_or_404()
 
@@ -477,6 +479,6 @@ def video_response():
     return render_template('index.html', response='ok', data=vehicle_pagination, name=current_user.username)
 
 
-@main.route('/video_restart', methods=["POST", "GET"])
+@main.route('/dashboard')
 def video_restart():
     return redirect(url_for('main.dashboard'))
