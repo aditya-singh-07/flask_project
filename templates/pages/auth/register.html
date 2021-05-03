@@ -1,6 +1,18 @@
 {% extends "pages/auth/header-footer.html" %} {% block header  %} {{ super() }} {% endblock %}
  {% block body %}
-  <body>
+<script>
+ function hideLoad() {
+  setTimeout(function(){
+    document.getElementById('loads').classList.add('hidden');
+  },2000)
+}
+</script>
+  <style>
+    .hidden {
+  display: none;
+}
+  </style>
+  <body onload="hideLoad()">
     <div class="container-scroller">
       <div class="container-fluid page-body-wrapper full-page-wrapper">
         <div class="content-wrapper d-flex align-items-center auth">
@@ -9,6 +21,18 @@
               <div class="auth-form-light text-left p-5">
                 <h4>New here?</h4>
                 <h6 class="font-weight-light">Signing up is easy. It only takes a few steps</h6>
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                      <div class="alert alert-primary " align="center"  id="loads" role="alert">
+                       {{ message }}
+                      </div>
+
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
                 <form class="pt-3" action="/signup" method="POST">
                    <div class="form-group">
                     <input type="text" name="username" class="form-control form-control-lg" id="exampleInputUsername1" placeholder="Username" required>

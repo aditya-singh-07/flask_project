@@ -19,7 +19,8 @@ def login_post():
     user= User.query.filter_by(email=email).first()
     print(email,check_password_hash(user.password,password))
     if not user or not check_password_hash(user.password,password):
-        return redirect('auth.login')
+        flash("Login failed try again")
+        return redirect(url_for('auth.login'))
     login_user(user, remember=remember)
     # flash("Welcome")
     return redirect(url_for('main.dashboard'))
@@ -38,11 +39,12 @@ def signup_post():
     print(email, hash_password)
     user= User.query.filter_by(email=email).first()
     if user:
+        flash("User Already exist try different email")
         return redirect(url_for('auth.signup'))
     New_user=User(username,email,hash_password)
     db.session.add(New_user)
     db.session.commit()
-
+    flash("Successfully created!!")
     return redirect(url_for('auth.login'))
 
 @auth.route('/logout')

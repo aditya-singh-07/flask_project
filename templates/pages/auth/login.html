@@ -1,14 +1,39 @@
 {% extends "pages/auth/header-footer.html" %} {% block header  %} {{ super() }} {% endblock %}
   {% block body %}
-  <body>
+<script>
+ function hideLoad() {
+  setTimeout(function(){
+    document.getElementById('loads').classList.add('hidden');
+  },2000)
+}
+</script>
+  <style>
+    .hidden {
+  display: none;
+}
+  </style>
+  <body onload="hideLoad()">
     <div class="container-scroller">
       <div class="container-fluid page-body-wrapper full-page-wrapper">
         <div class="content-wrapper d-flex align-items-center auth">
           <div class="row flex-grow">
             <div class="col-lg-4 mx-auto">
+
               <div class="auth-form-light text-left p-5">
                 <h4>Hello! let's get started</h4>
                 <h6 class="font-weight-light">Sign in to continue.</h6>
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                      <div class="alert alert-primary " align="center"  id="loads" role="alert">
+                       {{ message }}
+                      </div>
+
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
                 <form class="pt-3" action='/login' method="POST">
                   <div class="form-group">
                     <input type="email" name="email" class="form-control form-control-lg" id="exampleInputEmail1" placeholder="Email" required >
@@ -28,10 +53,10 @@
                     </div>
                     <a href="#" class="auth-link text-black">Forgot password?</a>
                   </div>
-                  <div class="mb-2">
-                    <button type="button" class="btn btn-block btn-facebook auth-form-btn" style="background-color: #3b579d;color:white">
-                      <i class="mdi mdi-facebook mr-2"></i>Connect using facebook </button>
-                  </div>
+<!--                  <div class="mb-2">-->
+<!--                    <button type="button" class="btn btn-block btn-facebook auth-form-btn" style="background-color: #3b579d;color:white">-->
+<!--                      <i class="mdi mdi-facebook mr-2"></i>Connect using facebook </button>-->
+<!--                  </div>-->
                   <div class="text-center mt-4 font-weight-light"> Don't have an account? <a href="{{url_for('auth.signup')}}" class="text-primary">Create</a>
                   </div>
                 </form>
