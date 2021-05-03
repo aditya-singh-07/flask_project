@@ -32,7 +32,7 @@ mydb = mysql.connector.connect(
 
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './uploads'
+UPLOAD_FOLDER = './flask_project/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -272,8 +272,7 @@ def renderJSON(json_v):
 def upload_file():
     if request.method == 'POST':
         f = request.files['file']
-        index=f.filename.split('.')[1]
-        print(index)
+        index = f.filename.split('.')[1]
         if f.filename != '':
             if index != "mp4":
                 filename = secure_filename(f.filename)
@@ -287,7 +286,7 @@ def upload_file():
                 file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
                 if file.exists():
                     print("File exist")
-                    car_image = "./uploads/testimage.png"
+                    car_image = "./flask_project/uploads/testimage.png"
 
                     # Contacting External Server
                     response = findCar(car_image)
@@ -299,7 +298,7 @@ def upload_file():
                     print(json_response)
 
                     renderJSON(json_response)
-                    flash("recognized Success")
+                    #flash("recognized Success")
                 else:
                     print("File not exist")
             # Car Image to be Processed
@@ -316,7 +315,7 @@ def upload_file():
 
             return redirect(url_for('main.dashboard'))
         else:
-            flash(" Please select images")
+            flash(" Please select Video/Images")
             return redirect(url_for('main.dashboard'))
 
 
@@ -360,7 +359,7 @@ def search():
 
 
 # camera = cv2.VideoCapture(0)
-camera = cv2.VideoCapture('D:/Project/flask-project/venv/flask_project/video/cars3.mp4')
+camera = cv2.VideoCapture('D:/Project/flask-project/venv/flask_project/uploads/cars3.mp4')
 
 
 def snapshot(frame, ctr):
