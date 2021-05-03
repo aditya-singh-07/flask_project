@@ -456,27 +456,30 @@ def video_feed():
 
 @main.route('/video_process', methods=["POST", "GET"])
 def video_response():
-    camera.release()
-    cv2.destroyAllWindows()
+    count = 1
+    #camera.release()
+    #cv2.destroyAllWindows()
     if (mydb):
         print("connected with database ")
     mycursor = mydb.cursor()
-    sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
-    val = {
-        'vehicle': vehicle_name,
-        'model': vehicle_model,
-        'color': vehicle_color,
-        'type': vehicle_type,
-        'number_plate': vehicle_number_plate,
-        'date_created': date
-    }
-    mycursor.execute(sql, val)
-    mydb.commit()
+    if count == 1:
+        sql = "INSERT INTO vehicle_data(user_id,vehicle,model,color,type,number_plate,date_created) VALUES (4,%(vehicle)s,%(model)s,%(color)s,%(type)s,%(number_plate)s,%(date_created)s)"
+        val = {
+            'vehicle': vehicle_name,
+            'model': vehicle_model,
+            'color': vehicle_color,
+            'type': vehicle_type,
+            'number_plate': vehicle_number_plate,
+            'date_created': date
+        }
+        mycursor.execute(sql, val)
+        mydb.commit()
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle = user.vehicledata
+    hide=True
     vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
-    return render_template('index.html', response='ok', data=vehicle_pagination, name=current_user.username)
+    return render_template('index.html', response='ok',hidden=hide, data=vehicle_pagination, name=current_user.username)
 
 
 @main.route('/dashboard')

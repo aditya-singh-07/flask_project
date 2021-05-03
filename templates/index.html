@@ -93,7 +93,9 @@
                         {% endif %}
                       </form>
                       <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right">
+                          {% if hidden != True %}
                         <img src="{{ url_for('main.video_feed') }}" width="100%">
+                          {% endif %}
                       </div>
 
 
