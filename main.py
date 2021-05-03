@@ -33,7 +33,7 @@ mydb = mysql.connector.connect(
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 main = Blueprint('main', __name__)
@@ -48,10 +48,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    global page_global, user_global, vehicle_global, vehicle_pagination_global,week_count,active_count
+    global page_global, user_global, vehicle_global, vehicle_pagination_global, week_count, active_count
     page_global = request.args.get('page', 1, type=int)
     user_global = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle_global = user_global.vehicledata
@@ -60,21 +61,26 @@ def dashboard():
     week_ago = now - timedelta(hours=8)
     total_visit_today = now - timedelta(hours=12)
 
-    week_count=VehicleData.query.filter(VehicleData.date_created > week_ago).filter(VehicleData.date_created < now).count()
+    week_count = VehicleData.query.filter(VehicleData.date_created > week_ago).filter(
+        VehicleData.date_created < now).count()
     active_count = Activitylog.query.filter(Activitylog.date_updated <= total_visit_today).count()
     if camera is None or not camera.isOpened():
         print(" Camera not working")
     if request.method == 'GET':
         user_log = User.query.filter_by(email=current_user.email).first_or_404()
         count_log = Activitylog.query.filter_by(author=user_log).count()
-        return render_template('index.html',count=week_count,log=count_log,active=active_count, data=vehicle_pagination_global, name=current_user.username)
+        return render_template('index.html', count=week_count, log=count_log, active=active_count,
+                               data=vehicle_pagination_global, name=current_user.username)
 
 
 @main.route('/stop')
 @login_required
 def video_stop():
     hide = False
-    return render_template('index.html', hidden=hide,count=week_count,log=count_log, data=vehicle_pagination_global, name=current_user.username)
+    user_log = User.query.filter_by(email=current_user.email).first_or_404()
+    count_log = Activitylog.query.filter_by(author=user_log).count()
+    return render_template('index.html', hidden=hide, count=week_count, log=count_log, data=vehicle_pagination_global,
+                           name=current_user.username)
 
 
 # @main.route('/dashboard',methods=['GET'])
@@ -132,7 +138,8 @@ def vehicle_updates(vehicle_id):
     vehicle_log = user_log.activitylog
     vehicle_pagination_log = Activitylog.query.filter_by(author=user_log).count()
     count_log = Activitylog.query.filter_by(author=user_log).count()
-    return render_template('edit.html',count=week_count,log=count_log,active=active_count, vehicle=vehicle_details, name=current_user.username)
+    return render_template('edit.html', count=week_count, log=count_log, active=active_count, vehicle=vehicle_details,
+                           name=current_user.username)
 
 
 @main.route('/details/<int:vehicle_id>/delete', methods=['GET', 'POST'])
@@ -221,7 +228,7 @@ def renderJSON(json_v):
     vehicle_color = data["car_color"]["name"].upper();
     vehicle_type = data["car_type"].upper();
     vehicle_number_plate = data["number_plate"].upper();
-    date = datetime.datetime.now();
+    date = datetime.now();
 
     if (mydb):
         print("connected with database ")
@@ -265,34 +272,47 @@ def renderJSON(json_v):
 def upload_file():
     if request.method == 'POST':
         f = request.files['file']
+        index=f.filename.split('.')[1]
+        print(index)
         if f.filename != '':
-            filename = secure_filename(f.filename)
-            file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
-            if file.exists():
-                os.remove(UPLOAD_FOLDER + "/" + 'testimage.png')
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            os.rename(UPLOAD_FOLDER + "/" + filename, UPLOAD_FOLDER + "/" + 'testimage.png')
-            # f.save(secure_filename(f.filename))
-            # flash("Uploaded Successfully")
-            file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
-            if file.exists():
-                print("File exist")
-                car_image = "./uploads/testimage.png"
+            if index != "mp4":
+                filename = secure_filename(f.filename)
+                file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
+                if file.exists():
+                    os.remove(UPLOAD_FOLDER + "/" + 'testimage.png')
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                os.rename(UPLOAD_FOLDER + "/" + filename, UPLOAD_FOLDER + "/" + 'testimage.png')
+                # f.save(secure_filename(f.filename))
+                # flash("Uploaded Successfully")
+                file = pathlib.Path(UPLOAD_FOLDER + "/" + 'testimage.png')
+                if file.exists():
+                    print("File exist")
+                    car_image = "./uploads/testimage.png"
 
-                # Contacting External Server
-                response = findCar(car_image)
+                    # Contacting External Server
+                    response = findCar(car_image)
 
-                # Converting their Response to JSON
-                json_response = json.loads(response)
+                    # Converting their Response to JSON
+                    json_response = json.loads(response)
 
-                # Processing that JSON for our Parameters
-                print(json_response)
+                    # Processing that JSON for our Parameters
+                    print(json_response)
 
-                renderJSON(json_response)
-                flash("recognized Success")
-            else:
-                print("File not exist")
+                    renderJSON(json_response)
+                    flash("recognized Success")
+                else:
+                    print("File not exist")
             # Car Image to be Processed
+            else:
+                filename_video = secure_filename(f.filename)
+                file = pathlib.Path(UPLOAD_FOLDER + "/" + 'cars3.mp4')
+                if file.exists():
+                    os.remove(UPLOAD_FOLDER + "/" + 'cars3.mp4')
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename_video))
+                os.rename(UPLOAD_FOLDER + "/" + filename_video, UPLOAD_FOLDER + "/" + 'cars3.mp4')
+                # f.save(secure_filename(f.filename))
+                flash("Uploaded Successfully")
+                file = pathlib.Path(UPLOAD_FOLDER + "/" + 'cars3.mp4')
 
             return redirect(url_for('main.dashboard'))
         else:
@@ -303,13 +323,13 @@ def upload_file():
 @main.route('/activity')
 @login_required
 def activitylog():
-    global page_log,user_log,vehicle_log,vehicle_pagination_log,count_log
+    global page_log, user_log, vehicle_log, vehicle_pagination_log, count_log
     page_log = request.args.get('page', 1, type=int)
     user_log = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle_log = user_log.activitylog
     vehicle_pagination_log = Activitylog.query.filter_by(author=user_log).paginate(page=page_log, per_page=5)
     count_log = Activitylog.query.filter_by(author=user_log).count()
-    return render_template('activity.html',data=vehicle_pagination_log)
+    return render_template('activity.html', data=vehicle_pagination_log)
 
 
 # @main.route("/search", methods=["POST","GET"])
@@ -331,10 +351,12 @@ def search():
     week_ago = now - timedelta(hours=8)
     total_visit_today = now - timedelta(hours=12)
     active_count = Activitylog.query.filter(Activitylog.date_updated <= total_visit_today).count()
-    week_count=VehicleData.query.filter(VehicleData.date_created > week_ago).filter(VehicleData.date_created < now).count()
+    week_count = VehicleData.query.filter(VehicleData.date_created > week_ago).filter(
+        VehicleData.date_created < now).count()
     user_log = User.query.filter_by(email=current_user.email).first_or_404()
     count_log = Activitylog.query.filter_by(author=user_log).count()
-    return render_template('index.html', count=week_count,log=count_log, active=active_count, data=vehicle_pagination, name=current_user.username)
+    return render_template('index.html', count=week_count, log=count_log, active=active_count, data=vehicle_pagination,
+                           name=current_user.username)
 
 
 # camera = cv2.VideoCapture(0)
@@ -383,7 +405,7 @@ def renderJSON_video(json_v):
     vehicle_color = data["car_color"]["name"].upper();
     vehicle_type = data["car_type"].upper();
     vehicle_number_plate = data["number_plate"].upper();
-    date = datetime.datetime.now();
+    date = datetime.now();
     count = count + 1
     data["number_plate"] = json_v["objects"][0]["vehicleAnnotation"]["recognitionConfidence"]
     # print("{:.1f}".format(data["number_plate"]))
@@ -509,7 +531,7 @@ def video_response():
     vehicle = user.vehicledata
     hide = False
     vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
-    return render_template('index.html',count=week_count, response='ok', hidden=hide, data=vehicle_pagination,
+    return render_template('index.html', count=week_count, response='ok', hidden=hide, data=vehicle_pagination,
                            name=current_user.username)
 
 
@@ -522,4 +544,5 @@ def video_restart():
 def video_start():
     hide = True
     if request.method == 'GET':
-        return render_template('index.html',count=week_count, hidden=hide, data=vehicle_pagination_global, name=current_user.username)
+        return render_template('index.html', count=week_count, hidden=hide, data=vehicle_pagination_global,
+                               name=current_user.username)
