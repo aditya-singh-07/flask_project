@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import  login_user, logout_user, login_required
+from flask_login import  login_user, logout_user, login_required, current_user
 from .model import User,db
 
 auth = Blueprint('auth', __name__)
@@ -22,7 +22,7 @@ def login_post():
         flash("Login failed try again")
         return redirect(url_for('auth.login'))
     login_user(user, remember=remember)
-    # flash("Welcome")
+    flash("Welcome "+ current_user.username)
     return redirect(url_for('main.dashboard'))
 
 @auth.route('/signup')

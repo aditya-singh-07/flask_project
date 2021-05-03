@@ -3,8 +3,7 @@ import socket
 import time
 
 import mysql
-from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify, Response, \
-    stream_with_context, make_response
+from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify, Response
 from flask_login import login_required, current_user
 from datetime import date
 from werkzeug.utils import secure_filename
@@ -19,7 +18,7 @@ import numpy as np
 import cv2
 import http.client as httplib
 import mysql.connector
-import datetime
+from datetime import datetime, timedelta
 import pathlib
 
 # //////////////////
@@ -49,18 +48,33 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @main.route('/dashboard')
 @login_required
 def dashboard():
+    global page_global, user_global, vehicle_global, vehicle_pagination_global,week_count,active_count
+    page_global = request.args.get('page', 1, type=int)
+    user_global = User.query.filter_by(email=current_user.email).first_or_404()
+    vehicle_global = user_global.vehicledata
+    vehicle_pagination_global = VehicleData.query.filter_by(author=user_global).paginate(page=page_global, per_page=3)
+    now = datetime.now()
+    week_ago = now - timedelta(hours=8)
+    total_visit_today = now - timedelta(hours=12)
+
+    week_count=VehicleData.query.filter(VehicleData.date_created > week_ago).filter(VehicleData.date_created < now).count()
+    active_count = Activitylog.query.filter(Activitylog.date_updated <= total_visit_today).count()
     if camera is None or not camera.isOpened():
         print(" Camera not working")
-    page = request.args.get('page', 1, type=int)
-    user = User.query.filter_by(email=current_user.email).first_or_404()
+    if request.method == 'GET':
+        user_log = User.query.filter_by(email=current_user.email).first_or_404()
+        count_log = Activitylog.query.filter_by(author=user_log).count()
+        return render_template('index.html',count=week_count,log=count_log,active=active_count, data=vehicle_pagination_global, name=current_user.username)
 
-    vehicle = user.vehicledata
-    vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
-    return render_template('index.html', data=vehicle_pagination, name=current_user.username)
+
+@main.route('/stop')
+@login_required
+def video_stop():
+    hide = False
+    return render_template('index.html', hidden=hide,count=week_count,log=count_log, data=vehicle_pagination_global, name=current_user.username)
 
 
 # @main.route('/dashboard',methods=['GET'])
@@ -111,7 +125,14 @@ def vehicle_updates(vehicle_id):
         db.session.commit()
         flash("Successfully updated!!")
         return redirect(url_for('main.dashboard'))
-    return render_template('edit.html', vehicle=vehicle_details, name=current_user.username)
+    now = datetime.now()
+    week_ago = now - timedelta(hours=8)
+    page_log = request.args.get('page', 1, type=int)
+    user_log = User.query.filter_by(email=current_user.email).first_or_404()
+    vehicle_log = user_log.activitylog
+    vehicle_pagination_log = Activitylog.query.filter_by(author=user_log).count()
+    count_log = Activitylog.query.filter_by(author=user_log).count()
+    return render_template('edit.html',count=week_count,log=count_log,active=active_count, vehicle=vehicle_details, name=current_user.username)
 
 
 @main.route('/details/<int:vehicle_id>/delete', methods=['GET', 'POST'])
@@ -216,13 +237,13 @@ def renderJSON(json_v):
     }
 
     # sql = VehicleData(4, vehicle_name, vehicle_model, vehicle_color, vehicle_type, vehicle_number_plate, date)
-    # change = "Recognized Vehicle "
-    # hostname = socket.gethostname()
-    # IP = socket.gethostbyname(hostname)
-    # log = Activitylog(4, current_user.username, change, IP, date.today())
-    # db.session.add(log)
+    change = "Recognized Vehicle "
+    hostname = socket.gethostname()
+    IP = socket.gethostbyname(hostname)
+    log = Activitylog(4, current_user.username, change, IP, date.today())
+    db.session.add(log)
     # db.session.add(sql)
-    # db.session.commit()
+    db.session.commit()
     # print(val)
     # g = geocoder.ip('me')
     # lat=g.lat
@@ -282,11 +303,13 @@ def upload_file():
 @main.route('/activity')
 @login_required
 def activitylog():
-    page = request.args.get('page', 1, type=int)
-    user = User.query.filter_by(email=current_user.email).first_or_404()
-    # vehicle = user.activitylog
-    vehicle_pagination = Activitylog.query.filter_by(author=user).paginate(page=page, per_page=5)
-    return render_template('activity.html', data=vehicle_pagination)
+    global page_log,user_log,vehicle_log,vehicle_pagination_log,count_log
+    page_log = request.args.get('page', 1, type=int)
+    user_log = User.query.filter_by(email=current_user.email).first_or_404()
+    vehicle_log = user_log.activitylog
+    vehicle_pagination_log = Activitylog.query.filter_by(author=user_log).paginate(page=page_log, per_page=5)
+    count_log = Activitylog.query.filter_by(author=user_log).count()
+    return render_template('activity.html',data=vehicle_pagination_log)
 
 
 # @main.route("/search", methods=["POST","GET"])
@@ -304,7 +327,14 @@ def search():
     search = "%{}%".format(searchbox)
     page = request.args.get('page', 1, type=int)
     vehicle_pagination = VehicleData.query.filter(VehicleData.vehicle.like(search)).paginate(page=page, per_page=3)
-    return render_template('index.html', data=vehicle_pagination, name=current_user.username)
+    now = datetime.now()
+    week_ago = now - timedelta(hours=8)
+    total_visit_today = now - timedelta(hours=12)
+    active_count = Activitylog.query.filter(Activitylog.date_updated <= total_visit_today).count()
+    week_count=VehicleData.query.filter(VehicleData.date_created > week_ago).filter(VehicleData.date_created < now).count()
+    user_log = User.query.filter_by(email=current_user.email).first_or_404()
+    count_log = Activitylog.query.filter_by(author=user_log).count()
+    return render_template('index.html', count=week_count,log=count_log, active=active_count, data=vehicle_pagination, name=current_user.username)
 
 
 # camera = cv2.VideoCapture(0)
@@ -457,8 +487,8 @@ def video_feed():
 @main.route('/video_process', methods=["POST", "GET"])
 def video_response():
     count = 1
-    #camera.release()
-    #cv2.destroyAllWindows()
+    # camera.release()
+    # cv2.destroyAllWindows()
     if (mydb):
         print("connected with database ")
     mycursor = mydb.cursor()
@@ -477,11 +507,19 @@ def video_response():
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle = user.vehicledata
-    hide=True
+    hide = False
     vehicle_pagination = VehicleData.query.filter_by(author=user).paginate(page=page, per_page=3)
-    return render_template('index.html', response='ok',hidden=hide, data=vehicle_pagination, name=current_user.username)
+    return render_template('index.html',count=week_count, response='ok', hidden=hide, data=vehicle_pagination,
+                           name=current_user.username)
 
 
 @main.route('/dashboard')
 def video_restart():
     return redirect(url_for('main.dashboard'))
+
+
+@main.route('/start')
+def video_start():
+    hide = True
+    if request.method == 'GET':
+        return render_template('index.html',count=week_count, hidden=hide, data=vehicle_pagination_global, name=current_user.username)

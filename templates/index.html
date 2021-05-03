@@ -7,9 +7,9 @@
             </div>
             <div class="page-header">
               <h3 class="page-title">
-                <div class="toast-body" id="toastmessage">
-                  welcome, {{ name }}
-                </div>
+<!--                <div class="toast-body" id="toastmessage">-->
+<!--                  welcome, {{ name }}-->
+<!--                </div>-->
                 {% with messages = get_flashed_messages() %}
                   {% if messages %}
                     <ul class=flashes>
@@ -41,8 +41,8 @@
                     <img src="{{ url_for('static', filename='assets/images/dashboard/circle.svg')}}" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Weekly Track <i class="mdi mdi-chart-line mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5">$ 15,0000</h2>
-                    <h6 class="card-text">Increased by 60%</h6>
+                    <h2 class="mb-5">{{ count }}</h2>
+<!--                    <h6 class="card-text">Increased by 60%</h6>-->
                   </div>
                 </div>
               </div>
@@ -52,8 +52,8 @@
                     <img src="{{ url_for('static', filename='assets/images/dashboard/circle.svg')}}" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Weekly log <i class="mdi mdi-bookmark-outline mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5">45,6334</h2>
-                    <h6 class="card-text">Decreased by 10%</h6>
+                    <h2 class="mb-5">{{ log }}</h2>
+<!--                    <h6 class="card-text">Decreased by 10%</h6>-->
                   </div>
                 </div>
               </div>
@@ -61,10 +61,10 @@
                 <div class="card bg-gradient-success card-img-holder text-white">
                   <div class="card-body">
                     <img src="{{ url_for('static', filename='assets/images/dashboard/circle.svg')}}" class="card-img-absolute" alt="circle-image" />
-                    <h4 class="font-weight-normal mb-3">Visitors Online <i class="mdi mdi-diamond mdi-24px float-right"></i>
+                    <h4 class="font-weight-normal mb-3">Visitors Today <i class="mdi mdi-diamond mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5">95,5741</h2>
-                    <h6 class="card-text">Increased by 5%</h6>
+                    <h2 class="mb-5">{{ active }}</h2>
+<!--                    <h6 class="card-text">Increased by 5%</h6>-->
                   </div>
                 </div>
               </div>
@@ -85,17 +85,33 @@
                         {% if response != 'ok'%}
                         <button type="submit" class="btn btn-success btn-lg btn-rounded btn-md pl-4 pr-4  mb-2 mr-5" style="background-color:#1bcfb4;border: 0px;height: 50px; width:100%;" ><i class="fa fa-edit"></i>Start Processing</button>
                          {% endif %}
-                        {% if response == 'ok' %}
+                      </form>
+                      <div class="container">
+                        <div class="row">
+                          <div class="col-sm">
+                            <form action = "{{ url_for('main.video_start') }}">
+                            <button type="submit" class="btn btn-success btn-lg" style="background-color:#b66dff;border: 0px;" >Start video</button>
+                            </form>
+                          </div>
+                          <div class="col-sm">
+                            <form action = "{{ url_for('main.video_stop') }}">
+                            <button type="submit" class="btn btn-primary btn-lg " style="background-color:#ff7961;border: 0px;" >Stop video</button><br>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                      <br>
+                      {% if response == 'ok' %}
                         <h3> vehicle: {{ data.items[-1].vehicle }} </h3>
                         <h3> Car Color: {{ data.items[-1].color }} </h3>
                         <h3> Number Plate: {{ data.items[-1].number_plate }} </h3>
 
                         {% endif %}
-                      </form>
-                      <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right">
-                          {% if hidden != True %}
+                      <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right mt-3 float-right">
+                          {% if hidden == True %}
                         <img src="{{ url_for('main.video_feed') }}" width="100%">
                           {% endif %}
+
                       </div>
 
 
