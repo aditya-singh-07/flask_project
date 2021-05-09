@@ -5,7 +5,9 @@ from .model import User,db
 
 auth = Blueprint('auth', __name__)
 
-
+@auth.route('/')
+def home():
+    return redirect(url_for('auth.login'))
 
 @auth.route('/login')
 def login():

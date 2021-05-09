@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta charset="utf-8" /> <!-- first element so that the encoding is applied to the title etc. -->
+    <title>Letter</title>
+    <link rel="stylesheet" href="letter.css" />
+  </head>
+<style>
+    body {
+  border: 1px solid black;
+  padding: 4px;
+}
+</style>
+  <body>
+
+    <header> 
+<!--      <address class="return-address">-->
+<!--      </address>-->
+
+      Type of vehicle:  {{ vehicle_type }} <br>
+      Vehicle:  {{ vehicle_name }}<br>
+      Model:  {{ vehicle_model }}<br>
+      Number plate: {{ vehicle_numberplate }}<br>
+      Time: <time>{{ time }}</time>
+    </header>
+    <h4>
+        To ,<br>
+        Vehicle Authority
+    </h4>
+    <h2>
+      Subject:  Request for legal action
+    </h2>
+
+    <div class="content"> <!-- use this div only if it is required for styling -->
+        <p style="font-size: 16px;">
+          Respected  Sir Madam,
+          <br class="solution" />
+
+          I would like to inform you that on {{ incident_date }}.{{ action }}<br>
+            It is a humble request to you to please take a quick action in this matter very important.<br>
+        </p>
+        <p>
+           I will be very thankful if you could please find these documents. I have also filed the complaint against the same.Requested you to see on this incident and waiting for your response.
+        </p>
+        <p>
+            Thanking you,
+        </p>
+      </div>
+
+      <p class="adios">
+       Sincerely,
+        <br class="greets" />
+        admin <br/>
+      </p>
+
+  </body>
+
+</html>

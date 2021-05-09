@@ -196,6 +196,10 @@
                                   <a class="btn btn-gradient-danger btn-sm btn-sm btn-rounded " style="border: 0px;"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button" title="Delete"><i class="fa fa-trash"></i>delete</a>
                                     <!-- <a class="btn btn-danger btn-sm btn-rounded"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button"  title="Delete"><i class="fa fa-trash"></i>delete</a> -->
                                 </li>
+                                <li class="list-inline-item">
+                                  <a class="btn btn-gradient-danger btn-sm btn-sm btn-rounded " style="border: 0px;"  href="{{ url_for('main.generate', id=vehicle.id) }}" type="button" title="generate"><i class="fa fa-generate"></i>generate</a>
+                                    <!-- <a class="btn btn-danger btn-sm btn-rounded"  href="{{ url_for('main.vehicle_delete', vehicle_id=vehicle.id) }}" type="button"  title="Delete"><i class="fa fa-trash"></i>delete</a> -->
+                                </li>
                             </ul>
                             </td>
                           </tr>
@@ -299,6 +303,43 @@
       </div>
     </div>
   </div>
+<script>
+  $('#exampleModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var recipient = button.data('whatever') // Extract info from data-* attributes
+
+})
+</script>
+          <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Recipient:</label>
+            <input type="text" class="form-control" id="recipient-name">
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Message:</label>
+            <textarea class="form-control" id="message-text"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Send message</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
           <!-- content-wrapper ends -->
           <!-- partial:partials/_footer.html -->

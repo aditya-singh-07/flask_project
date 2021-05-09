@@ -3,7 +3,7 @@ import socket
 import time
 
 import mysql
-from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify, Response
+from flask import Blueprint, redirect, render_template, request, url_for, flash, Flask, jsonify, Response, make_response
 from flask_login import login_required, current_user
 from datetime import date
 from werkzeug.utils import secure_filename
@@ -20,8 +20,9 @@ import http.client as httplib
 import mysql.connector
 from datetime import datetime, timedelta
 import pathlib
-
+import pdfkit
 # //////////////////
+
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -48,11 +49,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    global page_global, user_global, vehicle_global, vehicle_pagination_global, week_count, active_count
+    global page_global, user_global, vehicle_global, vehicle_pagination_global, week_count, active_count,count_log,user_log
     page_global = request.args.get('page', 1, type=int)
     user_global = User.query.filter_by(email=current_user.email).first_or_404()
     vehicle_global = user_global.vehicledata
@@ -120,7 +120,7 @@ def vehicle_updates(vehicle_id):
         vehicle_details.model = request.form['model']
         vehicle_details.color = request.form['color']
         vehicle_details.type = request.form['type']
-        vehicle_details.numberplate = request.form['numberplate']
+        vehicle_details.number_plate = request.form['numberplate']
         vehicle_details.date_created = date.today()
         change = "Updated Vehicle "
         hostname = socket.gethostname()
@@ -545,3 +545,27 @@ def video_start():
     if request.method == 'GET':
         return render_template('index.html', count=week_count, hidden=hide, data=vehicle_pagination_global,
                                name=current_user.username)
+@main.route('/generate/<id>')
+def generate(id):
+    vehicle_details = VehicleData.query.get_or_404(id)
+    return render_template('generate.html',vehicle=vehicle_details)
+
+wkhtmltopdf_options = {
+    'enable-local-file-access': None,
+    # 'javascript-delay': 2000
+}
+
+@main.route('/result/<vehicle_id>', methods=["POST", "GET"])
+def pdf_generator(vehicle_id):
+    if request.method == 'POST':
+        vehicle_details = VehicleData.query.get_or_404(vehicle_id)
+        vehicle = request.form.get('vehicle')
+        model = request.form.get('model')
+        numberplate=request.form.get('numberplate')
+        action=request.form.get('action')
+        rendered=render_template('pdf.html',vehicle_id=vehicle_details.id,vehicle_type=vehicle_details.type,vehicle_name=vehicle,vehicle_model=model,vehicle_numberplate=numberplate,action=action,time=datetime.now(),incident_date=vehicle_details.date_created)
+        pdf=pdfkit.from_string(rendered,False, options = wkhtmltopdf_options)
+        response=make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'inline; filename=report.pdf'
+        return response
