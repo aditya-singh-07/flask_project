@@ -562,8 +562,9 @@ def pdf_generator(vehicle_id):
         vehicle = request.form.get('vehicle')
         model = request.form.get('model')
         numberplate=request.form.get('numberplate')
+        subject=request.form.get('subject')
         action=request.form.get('action')
-        rendered=render_template('pdf.html',vehicle_id=vehicle_details.id,vehicle_type=vehicle_details.type,vehicle_name=vehicle,vehicle_model=model,vehicle_numberplate=numberplate,action=action,time=datetime.now(),incident_date=vehicle_details.date_created)
+        rendered=render_template('pdf.html',vehicle_id=vehicle_details.id,vehicle_type=vehicle_details.type,vehicle_name=vehicle,vehicle_model=model,vehicle_numberplate=numberplate,action=action,subject=subject,time=datetime.now(),incident_date=vehicle_details.date_created)
         pdf=pdfkit.from_string(rendered,False, options = wkhtmltopdf_options)
         response=make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'
